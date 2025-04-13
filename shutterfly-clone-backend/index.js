@@ -2,11 +2,13 @@
 const express = require('express');
 const morgan = require("morgan");
 const cors = require("cors");
+const passport = require('passport');
 const dotenv = require('dotenv');
 dotenv.config();
 
 // Internal imports
 const routes = require('./routes/index');
+const configurePassport = require('./config/passport');
 
 const app = express();
 const port = process.env.PORT;
@@ -18,7 +20,7 @@ if (NODE_ENV === "dev") {
 }
 
 const corsOptions = {
-    origin: ['http://localhost:5174', 'http://localhost:5175'],
+    origin: [process.env.FRONTEND_URL],
     optionSuccessStatus: 200,
     credentials: true,
 };
@@ -26,11 +28,14 @@ const corsOptions = {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
+app.use(passport.initialize());
 app.use('/api', routes);
 
 app.get('/', (req, res) => {
     res.send('API is live...');
 })
+
+configurePassport();
 
 try {
     app.listen(port, () => {
