@@ -40,9 +40,9 @@ async  function processSsoSignIn(userData) {
         status: 200,
         message: 'sso signin successful',
         data: {
-            ...convertedData,
             token,
-            refreshToken
+            refreshToken,
+            user: convertedData
         }
     };
 }
@@ -78,7 +78,7 @@ const registerUser = async (req, res) => {
         delete convertedData.password;
         delete convertedData.token;
 
-        return apiResponse("Success", "User registered successfully", {...convertedData, token, refreshToken}, 200, res);
+        return apiResponse("Success", "User registered successfully", {user: convertedData, token, refreshToken}, 200, res);
     } catch (err) {
         return apiResponse("Error", "Internal server error", null, 500, res);
     }
@@ -113,7 +113,7 @@ const signIn = async (req, res) => {
         delete convertedData.password;
         delete convertedData.token;
 
-        return apiResponse("Success", "Login successful", { ...convertedData, token, refreshToken }, 200, res);
+        return apiResponse("Success", "Login successful", { user: convertedData, token, refreshToken }, 200, res);
     } catch (err) {
         return apiResponse("Error", "Unable to process sign in", null, 500, res);
     }

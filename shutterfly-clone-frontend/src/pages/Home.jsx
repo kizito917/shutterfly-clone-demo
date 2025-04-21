@@ -5,15 +5,11 @@ import { useNavigate } from "react-router-dom";
 
 // Internal imports
 import { uploadImage } from "../services/imageService";
-import SignUp from "../components/Signup";
-import SignIn from "../components/Signin";
 
 export default function Home() {
     const navigate = useNavigate();
 
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [signinModalOpen, setSigninModalOpen] = useState(false);
-    const [signupModalOpen, setSignupModalOpen] = useState(false);
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
 
@@ -77,14 +73,6 @@ export default function Home() {
 
                     {/* Right side with content */}
                     <div className="w-full md:w-1/2 p-8 flex flex-col justify-center bg-blue-100">
-                        {
-                            !isLoggedIn ? <div className="flex gap-6 w-[40%] mx-auto">
-                                <button className="w-full flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors" onClick={() => setSigninModalOpen(true)}>Login</button>
-                                <button className="w-full flex items-center justify-center gap-2 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors" onClick={() => setSignupModalOpen(true)}>Sign up</button>
-                            </div> : <div className="flex gap-6 w-[40%] mx-auto">
-                                User is logged in successfully
-                            </div>
-                        }
                         <div className="md:p-24">
                             <h1 className="text-4xl font-bold mb-6 text-gray-800">
                                 Welcome to Our Platform
@@ -133,8 +121,6 @@ export default function Home() {
                     </div>
                 </div>
             </div>
-            <SignUp isSignupModalOpen={signupModalOpen} closeSignupModal={() => setSignupModalOpen(false)} />
-            <SignIn isSigninModalOpen={signinModalOpen} closeSigninModal={() => setSigninModalOpen(false)} />
         </>
     )
 }
