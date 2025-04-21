@@ -1,9 +1,9 @@
-"use client";
-
 // External Imports
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from 'react-router-dom';
+
+// Internal imports
 import { LocalStorage } from "../helpers/localstorageHelper";
 
 const Navbar = () => {

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { LocalStorage } from "./localstorageHelper";
 
-axios.defaults.baseURL = import.meta.env.MODE === "development" ? import.meta.env.VITE_APP_API_URL_DEV : import.meta.env.VITE_APP_API_URL_PROD;
+axios.defaults.baseURL = import.meta.env.VITE_APP_API_URL;
 axios.defaults.withCredentials = true;
 axios.interceptors.response.use(
     (response) => {
@@ -20,10 +20,10 @@ axios.interceptors.response.use(
 
 axios.interceptors.request.use((config) => {
     const authToken = LocalStorage.getItem("shutterfly-auth-token");
-    console.log("AUTH TOKEN", authToken);
     if (authToken) {
         config.headers.Authorization = `${authToken}`;
     }
+    
     return config;
 });
 

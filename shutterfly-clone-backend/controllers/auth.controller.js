@@ -130,7 +130,7 @@ const googleLoginCallback = async (req, res) => {
         return res.redirect(`${process.env.FRONTEND_URL}/login?type=invalid`);
       }
 
-      return res.redirect(`${process.env.FRONTEND_URL}/signin-success?token=${data.token}`);
+      return res.redirect(`${process.env.FRONTEND_URL}/signin-success?token=${data.token}&refreshToken=${data.refreshToken}`);
     } catch (err) {
       return res.redirect(`${process.env.FRONTEND_URL}/login?type=invalid`);
     }

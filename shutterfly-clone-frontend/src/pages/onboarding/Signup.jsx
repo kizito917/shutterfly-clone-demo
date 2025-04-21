@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 
 // Internal imports
 import TextField from "../../components/TextField";
-import { registerUser } from "../../services/onboardingService";
+import { registerUser } from "../../services/onboarding";
 import { LocalStorage } from "../../helpers/localstorageHelper";
 
 const registerValidationSchema = Yup.object().shape({

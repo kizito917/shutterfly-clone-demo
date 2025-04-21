@@ -7,6 +7,7 @@ import Navbar from "./components/Navbar"
 import Home from "./pages/Home"
 import Signup from "./pages/onboarding/Signup"
 import Signin from "./pages/onboarding/Signin"
+import SigninSuccess from "./pages/onboarding/SigninSuccess"
 import Editor from "./pages/Editor"
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
                 <Route path="/home" element={<Home />} />
                 <Route path="/register" element={<Signup />} />
                 <Route path="/login" element={<Signin />} />
+                <Route path="/signin-success" element={<SigninSuccess />} />
                 <Route path="/editor/:imageId" element={<Editor />} />
             </Routes>
         </>

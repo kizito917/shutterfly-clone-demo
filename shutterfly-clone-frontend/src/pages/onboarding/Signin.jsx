@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 // Internal imports
 import TextField from "../../components/TextField";
 import { LocalStorage } from "../../helpers/localstorageHelper";
-import { loginUser } from "../../services/onboardingService";
+import { loginUser } from "../../services/onboarding";
 
 const loginValidationSchema = Yup.object().shape({
     email: Yup.string()
@@ -121,6 +121,7 @@ export default function Signin() {
                 <button
                         type="button"
                         className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50"
+                        onClick={() => window.location.href = `${import.meta.env.VITE_APP_API_URL}/auth/google-signin`}
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
