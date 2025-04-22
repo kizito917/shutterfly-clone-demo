@@ -48,7 +48,7 @@ export default function Signup() {
     // Function to submit form
     const onSubmit = async (values) => {
         setIsLoading(true)
-        const { status, message } = await registerUser(values);
+        const { status, message, data } = await registerUser(values);
         if (status !== 200) {
             setIsLoading(false);
             toast.error(message);
