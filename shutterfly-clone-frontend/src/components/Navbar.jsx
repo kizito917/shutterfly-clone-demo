@@ -55,7 +55,7 @@ const Navbar = () => {
                 <div className="flex justify-between h-16 items-center">
                     <div className="flex-shrink-0 flex items-center">
                         <a href="/home" className="text-xl font-bold text-gray-900">
-                            Image App
+                            Art-Purchase app
                         </a>
                     </div>
 
