@@ -9,6 +9,7 @@ import Signup from "./pages/onboarding/Signup"
 import Signin from "./pages/onboarding/Signin"
 import SigninSuccess from "./pages/onboarding/SigninSuccess"
 import Editor from "./pages/Editor"
+import Profile from "./pages/Profile"
 
 function App() {
     return (
@@ -22,6 +23,7 @@ function App() {
                 <Route path="/login" element={<Signin />} />
                 <Route path="/signin-success" element={<SigninSuccess />} />
                 <Route path="/editor/:imageId" element={<Editor />} />
+                <Route path="/profile" element={<Profile />} />
             </Routes>
         </>
     )
