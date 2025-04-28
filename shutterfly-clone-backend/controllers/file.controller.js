@@ -21,7 +21,6 @@ const getContentType = (filePath) => {
 };
 
 const uploadImage = async (req, res) => {
-    console.log("I got in")
     try {
         const uploadedImage = await db.UserImage.create({
             user: req.user.id,

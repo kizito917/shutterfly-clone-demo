@@ -4,6 +4,8 @@ const morgan = require("morgan");
 const cors = require("cors");
 const passport = require('passport');
 const dotenv = require('dotenv');
+const path = require('path')
+const cookieParser = require("cookie-parser");
 dotenv.config();
 
 // Internal imports
@@ -28,8 +30,12 @@ const corsOptions = {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
+app.use(cookieParser(process.env.DATABASE_ENCRYPTION_KEY))
 app.use(passport.initialize());
 app.use('/api', routes);
+
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "pug");
 
 app.get('/', (req, res) => {
     res.send('API is live...');

@@ -53,7 +53,7 @@ export default function Home() {
         setLoading(false)
         toast.success("Image uploaded successfully. Redirecting to image editor page");
         setTimeout(() => {
-            navigate(`/editor/${data.id}`)
+            navigate(`/editor2/${data.id}`)
         }, 3000);
         return 200;
     }
