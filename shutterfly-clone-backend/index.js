@@ -2,6 +2,7 @@
 const express = require('express');
 const morgan = require("morgan");
 const cors = require("cors");
+const path = require('path');
 const passport = require('passport');
 const dotenv = require('dotenv');
 dotenv.config();
@@ -26,6 +27,7 @@ const corsOptions = {
 };
 
 app.use(express.json());
+app.use(express.static(path.join(__dirname)));
 app.use(express.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
 app.use(passport.initialize());

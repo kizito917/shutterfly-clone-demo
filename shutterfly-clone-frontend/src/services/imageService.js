@@ -22,17 +22,16 @@ export const uploadImage = async (formPayload) => {
     return { status, message, data };
 }
 
-export const retrieveRequestedImage = async (imagedId) => {
+export const retrieveRequestedImage = async (imageId) => {
     try {
         const response = await Axios({
-            url: `/file/image/${imagedId}`, 
+            url: `/file/image/${imageId}`, 
             method: 'get',
-            responseType: 'blob'
         });
 
         status = 200;
         message = 'Image retrieved successfully';
-        data = response;
+        data = response.data;
     } catch (err) {
         console.log(err);
         status = err.response.status;

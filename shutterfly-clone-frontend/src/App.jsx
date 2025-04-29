@@ -10,6 +10,7 @@ import Signin from "./pages/onboarding/Signin"
 import SigninSuccess from "./pages/onboarding/SigninSuccess"
 import Editor from "./pages/Editor"
 import Profile from "./pages/Profile"
+import CanvaEditor from "./pages/CanvaEditor"
 
 function App() {
     return (
@@ -23,6 +24,7 @@ function App() {
                 <Route path="/login" element={<Signin />} />
                 <Route path="/signin-success" element={<SigninSuccess />} />
                 <Route path="/editor/:imageId" element={<Editor />} />
+                <Route path="/canva-editor/:imageId" element={<CanvaEditor />} />
                 <Route path="/profile" element={<Profile />} />
             </Routes>
         </>

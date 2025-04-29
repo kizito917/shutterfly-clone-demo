@@ -3,6 +3,7 @@ const { Router } = require("express");
 
 // Internal imports
 const authRoute = require('./auth.router');
+const canvaAuthRoutes = require('./canvaAuth.router');
 const fileRoute = require('./file.router');
 const profileRoute = require('./profile.router');
 
