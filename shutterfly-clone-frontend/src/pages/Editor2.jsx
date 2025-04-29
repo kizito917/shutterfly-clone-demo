@@ -2,40 +2,52 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import ImageFilter from "react-image-filter";
 
 // Internal imports
-import { retrieveRequestedImage } from "../services/imageService";
+import {
+  retrieveImageInfo,
+  retrieveRequestedImage,
+} from "../services/imageService";
 import { ConnectButton } from "../components/connect-button";
+import EditInCanvasButton from "../components/edit-button";
+import { useAppStore } from "../store";
 
 export default function Editor2() {
   const params = useParams();
-
+  const [design, setDesign] = useState({});
   const [imageUrl, setImageUrl] = useState(null);
+  const { canvaToken } = useAppStore();
+
+  const getImage = async (imageId) => {
+    const { status, message, data } = await retrieveRequestedImage(imageId);
+    if (status !== 200) {
+      toast.error(message);
+      return;
+    }
+
+    // Save image to be previwed to state
+    const imageUrl = window.URL.createObjectURL(new Blob([data]));
+    setImageUrl(imageUrl);
+  };
 
   useEffect(() => {
-    const getImage = async () => {
-      const { status, message, data } = await retrieveRequestedImage(
-        params.imageId
-      );
-      if (status !== 200) {
-        toast.error(message);
-        return;
-      }
-
-      // Save image to be previwed to state
-      const imageUrl = window.URL.createObjectURL(new Blob([data]));
-      setImageUrl(imageUrl);
-    };
-
-    getImage();
-  }, [params.imageId]);
+    retrieveImageInfo(params.imageId)
+      .then((res) => {
+        setDesign(res.data);
+        if(res.data.canvaDesignViewUrl) return setImageUrl(res.data.canvaDesignViewUrl);
+        getImage(res.data.id)
+      })
+      .catch((err) => {
+        console.error("Err", err);
+      });
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mt-10">
+        <div className="flex gap-3 mt-10">
           <ConnectButton />
+          {canvaToken ? <EditInCanvasButton design={design} /> : null}
         </div>
         <div className="flex gap-8">
           {/* Center Image Area */}

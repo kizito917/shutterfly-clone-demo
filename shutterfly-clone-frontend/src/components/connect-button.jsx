@@ -4,20 +4,21 @@ import {
   getCanvaAuthorization,
   revoke,
 } from "../services/canvaService";
+import { useAppStore } from "../store";
 
 export const ConnectButton = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [token, setToken] = useState(null);
+  const { setCanvaToken } = useAppStore();
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
     checkForAccessToken()
       .then((result) => {
         if (result.token) {
-          setToken(result.token);
+          setCanvaToken(result.token);
           setIsAuthorized(true);
         } else {
-          setToken(undefined);
+          setCanvaToken(undefined);
         }
       })
       .catch((err) => {
@@ -31,13 +32,13 @@ export const ConnectButton = () => {
       const result = await getCanvaAuthorization();
 
       if (result) {
-        setToken(result);
+        setCanvaToken(result);
         setIsAuthorized(true);
       } else {
-        setToken(undefined);
+        setCanvaToken(null);
       }
     } catch (error) {
-      setToken(undefined);
+      setCanvaToken(null);
       alert("Authorization has failed. Please try again later.");
     } finally {
       setIsLoading(false);
@@ -50,7 +51,7 @@ export const ConnectButton = () => {
       const result = await revoke();
 
       if (result) {
-        setToken(undefined);
+        setCanvaToken(undefined);
         setIsAuthorized(false);
       }
     } catch (error) {

@@ -15,7 +15,10 @@ module.exports = (sequelize, DataTypes) => {
   }
   UserImage.init({
     user: DataTypes.INTEGER,
-    imagePath: DataTypes.STRING
+    imagePath: DataTypes.STRING,
+    canvaDesignId: DataTypes.STRING,
+    canvaDesignUrl: DataTypes.TEXT,
+    canvaDesignViewUrl: DataTypes.TEXT,
   }, {
     sequelize,
     modelName: 'UserImage',

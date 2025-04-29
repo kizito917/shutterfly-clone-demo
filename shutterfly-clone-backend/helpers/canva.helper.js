@@ -1,4 +1,4 @@
-const { OauthService } = require("../services/canvas.service");
+const { OauthService, ExportService } = require("../services/canva.service");
 const { createClient } = require("@hey-api/client-fetch");
 const { encrypt, decrypt } = require("./crypto.helper");
 const jwt = require("jsonwebtoken");
@@ -27,7 +27,15 @@ async function deleteToken(id) {
 
 async function setToken(token, id) {
   const encrypted = await encrypt(JSON.stringify(token));
-  await db.CanvaToken.createToken(JSON.stringify(encrypted), id);
+  const existing = await db.CanvaToken.findOne({
+    where: { claim: id },
+  });
+  if (existing) {
+    existing.token = JSON.stringify(encrypted);
+    await existing.save();
+  } else {
+    await db.CanvaToken.createToken(JSON.stringify(encrypted), id);
+  }
 }
 
 async function getAccessTokenForUser(id) {
@@ -172,6 +180,63 @@ function getUserClient(token) {
   return localClient;
 }
 
+async function getDesignExportJobStatus(exportId, userClient) {
+  const result = await ExportService.getDesignExportJob({
+    client: userClient,
+    path: {
+      exportId,
+    },
+  });
+
+  if (result.error) {
+    console.error(result.error);
+    throw new Error(result.error.message);
+  }
+
+  const jobData = result.data;
+  console.log("JOB DATA", jobData)
+  
+  // TODO: Execute actual task
+
+  return jobData;
+}
+
+function poll(
+  job, // () => Promise<T>,
+  opts = {}
+) {
+  const {
+    initialDelayMs = 500,
+    increaseFactor = 1.6,
+    maxDelayMs = 10 * 1_000,
+  } = opts;
+
+  const exponentialDelay = (n) =>
+    Math.min(initialDelayMs * Math.pow(increaseFactor, n), maxDelayMs);
+
+  const pollJob = async (attempt = 0) => {
+    const delayMs = exponentialDelay(attempt);
+    const statusResult = await job();
+
+    const status = statusResult.job.status.toLocaleLowerCase();
+
+    switch (status) {
+      case "success":
+      case "failed":
+        return statusResult;
+      case "in_progress":
+        await new Promise((resolve) => {
+          setTimeout(resolve, delayMs);
+        });
+        return pollJob(attempt + 1);
+      default:
+        throw new Error(`Unknown job status ${status}`);
+    }
+  };
+
+  return pollJob();
+}
+
 module.exports = {
   OAUTH_STATE_COOKIE_NAME,
   OAUTH_CODE_VERIFIER_COOKIE_NAME,
@@ -183,4 +248,6 @@ module.exports = {
   getBasicAuthClient,
   getAccessTokenForUser,
   getUserClient,
+  poll,
+  getDesignExportJobStatus,
 };

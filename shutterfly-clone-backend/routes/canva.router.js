@@ -1,5 +1,7 @@
 const express = require("express");
 const crypto = require("crypto");
+const fs = require("fs/promises");
+const path = require("path");
 const jwt = require("jsonwebtoken");
 const constants = require("../config/constants");
 const {
@@ -13,12 +15,22 @@ const {
   getUserClient,
   getToken,
   deleteToken,
+  poll,
+  getDesignExportJobStatus,
 } = require("../helpers/canva.helper");
-const { OauthService } = require("../services/canvas.service");
+const {
+  OauthService,
+  AssetService,
+  client: DefaultClient,
+  ExportService,
+} = require("../services/canva.service");
 const { encrypt } = require("../helpers/crypto.helper");
 const db = require("../models");
 const { checkValidity } = require("../middlewares/checkValidity");
 const { checkCanvaAuth } = require("../middlewares/checkCanvaAuth");
+const { apiResponse } = require("../helpers/apiResponse.helper");
+const { createClient } = require("@hey-api/client-fetch");
+const { Worker } = require("worker_threads");
 
 const endpoints = {
   REDIRECT: "/oauth/redirect",
@@ -204,6 +216,215 @@ router.get(endpoints.TOKEN, checkCanvaAuth, async (req, res) => {
     return res.status(401).send("Unauthorized");
   }
   return res.status(200).send(req.token);
+});
+
+// Get info about an uploaded image
+router.get("/image/:imageId", checkValidity, async (req, res) => {
+  try {
+    const { imageId } = req.params;
+
+    // Check if ID is valid
+    const imageDetails = await db.UserImage.findOne({
+      where: { id: imageId },
+    });
+
+    if (!imageDetails) {
+      return apiResponse(
+        "Error",
+        "Image not found. Invalid ID provided",
+        null,
+        404,
+        res
+      );
+    }
+
+    return apiResponse(
+      "Success",
+      "Image design retrieved successfully",
+      imageDetails,
+      200,
+      res
+    );
+  } catch (err) {
+    return apiResponse(
+      "Error",
+      "Unable to retrieve requested image",
+      null,
+      500,
+      res
+    );
+  }
+});
+
+// Upload asset to canva
+router.post("/create-design", async (req, res) => {
+  if (!req.body.id)
+    return apiResponse("Error", "Please provide design id", null, 400, res);
+
+  // Check if ID is valid
+  const imageDetails = await db.UserImage.findOne({
+    where: { id: req.body.id },
+  });
+
+  if (!imageDetails) {
+    return apiResponse(
+      "Error",
+      "Image not found. Invalid ID provided",
+      null,
+      404,
+      res
+    );
+  }
+
+  // Get image path and construct full path
+  const imagePath = imageDetails.imagePath;
+  const fullPath = path.join(process.cwd(), imagePath);
+
+  try {
+    // Read the file
+    const imageBuffer = await fs.readFile(fullPath);
+    const name =
+      "New Design " +
+      crypto.randomUUID().split("-")[0] +
+      path.extname(imagePath);
+
+    const userToken = await getToken(req.signedCookies[AUTH_COOKIE_NAME]);
+    const result = await AssetService.createAssetUploadJob({
+      client: getUserClient(userToken.access_token),
+      headers: {
+        "Asset-Upload-Metadata": {
+          name_base64: btoa(name),
+        },
+      },
+      body: imageBuffer,
+      bodySerializer: (body) => body,
+    });
+
+    if (result.error) {
+      console.error(result.error);
+      return apiResponse("Error", "Failed to upload image", null, 500, res);
+    }
+
+    // Send the image
+    return apiResponse(
+      "Success",
+      "Access upload job done",
+      { ...result.data, name },
+      200,
+      res
+    );
+  } catch (fileErr) {
+    // Handle file reading errors
+    if (fileErr.code === "ENOENT") {
+      return apiResponse(
+        "Error",
+        "Image file not found on server",
+        null,
+        404,
+        res
+      );
+    }
+    console.log("File err", fileErr);
+    return apiResponse("Error", "Internal Server error", null, 500, res);
+  }
+});
+
+router.post("/image/:imageId", async (req, res) => {
+  if (!req.body.canvaDesignId || !req.body.canvaDesignUrl)
+    return apiResponse(
+      "Error",
+      "Please provide canvaDesignId, canvaDesignUrl",
+      null,
+      400,
+      res
+    );
+
+  try {
+    // Check if ID is valid
+    const imageDetails = await db.UserImage.findOne({
+      where: { id: Number(req.params.imageId) },
+    });
+
+    if (!imageDetails)
+      return apiResponse("Error", "Invalid design image id", null, 404, res);
+
+    // Update image
+    imageDetails.canvaDesignId = req.body.canvaDesignId;
+    imageDetails.canvaDesignUrl = req.body.canvaDesignUrl;
+
+    await imageDetails.save();
+
+    return apiResponse(
+      "Success",
+      "Image design updated successfully",
+      imageDetails,
+      200,
+      res
+    );
+  } catch (error) {
+    console.log(error);
+    return apiResponse("Error", "Internal server error", null, 500, res);
+  }
+});
+
+router.get("/return-nav", async (req, res) => {
+  const correlationJwt = req.query.correlation_jwt;
+  if (!correlationJwt) {
+    res.redirect(process.env.FRONTEND_URL);
+    return;
+  }
+
+  const decodedCorrelationJwt = jwt.decode(correlationJwt);
+
+  const designId = parseInt(
+    atob(decodeURIComponent(decodedCorrelationJwt.correlation_state))
+  );
+  if (Number.isNaN(designId)) {
+    res.redirect(process.env.FRONTEND_URL);
+    return;
+  }
+
+  // Update userimage with exported image from canva
+  try {
+    const userToken = await getToken(req.signedCookies[AUTH_COOKIE_NAME]);
+    const userClient = getUserClient(userToken.access_token);
+    const exportJobResponse = await ExportService.createDesignExportJob({
+      client: userClient,
+      body: {
+        design_id: decodedCorrelationJwt.design_id,
+        format: {
+          type: "png",
+          pages: [1], // Get only the first page
+          lossless: true,
+          width: 1000,
+          height: 1000,
+        },
+      },
+    });
+
+    if (exportJobResponse.error) {
+      console.error(exportJobResponse.error);
+      throw new Error(exportJobResponse.error.message);
+    }
+
+    const worker = new Worker(
+      path.join(__dirname, "../", "worker", "canva.worker.js"),
+      {
+        workerData: {
+          jobId: exportJobResponse.data.job.id,
+          token: userToken.access_token,
+          designId: designId,
+        },
+      }
+    );
+    worker.on("message", () => {
+      worker.terminate();
+    });
+    res.redirect(process.env.FRONTEND_URL + "/editor2/" + designId);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 });
 
 module.exports = router;
