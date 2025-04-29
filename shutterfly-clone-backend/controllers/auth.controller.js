@@ -80,6 +80,7 @@ const registerUser = async (req, res) => {
 
         return apiResponse("Success", "User registered successfully", {user: convertedData, token, refreshToken}, 200, res);
     } catch (err) {
+        console.log(err)
         return apiResponse("Error", "Internal server error", null, 500, res);
     }
 }
