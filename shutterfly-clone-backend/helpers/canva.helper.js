@@ -238,6 +238,7 @@ function poll(
 }
 
 module.exports = {
+  AUTH_COOKIE_NAME,
   OAUTH_STATE_COOKIE_NAME,
   OAUTH_CODE_VERIFIER_COOKIE_NAME,
   cookieAuth,
