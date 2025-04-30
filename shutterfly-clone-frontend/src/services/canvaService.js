@@ -126,7 +126,7 @@ const getAssetUploadJob = async (jobId, token) => {
   });
 
   if (result.error) {
-    console.error(result.error);
+    console.error("getAssetUploadJob error", result.error);
     throw new Error(result.error.message);
   }
 
@@ -136,6 +136,7 @@ const getAssetUploadJob = async (jobId, token) => {
 const pollAssetUpload = async (jobId, token) => {
   console.log("Job ID", jobId);
   const response = await poll(() => getAssetUploadJob(jobId, token));
+  console.log("POLL ASSET UPLOAD VALUE", response);
 
   if (!response.job.asset) {
     throw new Error(
@@ -163,7 +164,6 @@ export const uploadAssetAndCreateDesign = async (design, token) => {
   }
 
   const uploadJob = await response.json();
-  console.log("UPLOAD JOB RESPONSE", uploadJob);
 
   if (uploadJob.error) {
     console.error("Upload job error", uploadJob.error);
