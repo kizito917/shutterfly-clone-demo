@@ -156,21 +156,21 @@ export const uploadAssetAndCreateDesign = async (design, token) => {
     credentials: "include",
     body: JSON.stringify(design),
   });
-  console.log("CREATE DESIGN RESPONSE", response);
-  console.log("RESPONSE STATUS", response.status);
 
   if (!response.ok) {
     throw new Error(`HTTP error! Status: ${response.status}`);
   }
 
   const uploadJob = await response.json();
+  console.log("UPLOAD JOB RESPONSE", uploadJob);
 
   if (uploadJob.error) {
-    console.error(uploadJob.error);
+    console.error("Upload job error", uploadJob.error);
     throw new Error(uploadJob.error.message);
   }
 
   const asset = await pollAssetUpload(uploadJob.data.job.id, token);
+  console.log("ASSETS VALUE", asset);
 
   if (!asset) {
     throw new Error(
@@ -192,6 +192,7 @@ export const uploadAssetAndCreateDesign = async (design, token) => {
   }
 
   const createDesignResultData = createDesignResult.data;
+  console.log("CREATE DESIGN RESULT DATA", createDesignResultData);
 
   if (!createDesignResultData) {
     throw new Error("Unable to create design");
