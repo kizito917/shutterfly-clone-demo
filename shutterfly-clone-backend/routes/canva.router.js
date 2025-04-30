@@ -99,8 +99,8 @@ router.get(endpoints.REDIRECT, async (req, res) => {
         res.cookie(AUTH_COOKIE_NAME, claimsSub, {
             httpOnly: true,
             maxAge: 1000 * 60 * 60 * 24 * 3, // 3 days
-            sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
-            secure: process.env.NODE_ENV === "production",
+            sameSite: "none",
+            secure: true,
             signed: true,
         });
         await setToken(token, claimsSub);
@@ -128,8 +128,8 @@ router.get(endpoints.AUTHORIZE, async (req, res) => {
     const cookieConfiguration = {
         httpOnly: true,
         maxAge: 1000 * 60 * 60 * 20, // 20 minutes
-        sameSite: "lax", // since we will be redirecting back from Canva, we need the cookies to be sent with every request to our domain
-        secure: process.env.NODE_ENV === "production",
+        sameSite: "none", // since we will be redirecting back from Canva, we need the cookies to be sent with every request to our domain
+        secure: true,
         signed: true,
     };
 
