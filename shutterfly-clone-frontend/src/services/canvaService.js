@@ -1,6 +1,11 @@
 import { createClient } from "@hey-api/client-fetch";
 import { poll } from "../utils/poll";
-import { AssetService, client, DesignService } from "./apiService";
+import {
+  AssetService,
+  client,
+  DesignService,
+  ExportService,
+} from "./apiService";
 
 const ENDPOINT = import.meta.env.VITE_APP_API_URL;
 
@@ -225,6 +230,7 @@ export const getDesign = async (designId) => {
 
   return { design: design.data.design };
 };
+
 export const createNavigateToCanvaUrl = ({ editUrl, correlationState }) => {
   const redirectUrl = new URL(editUrl);
   const encodedCorrelationState = encodeCorrelationState(correlationState);
@@ -234,3 +240,43 @@ export const createNavigateToCanvaUrl = ({ editUrl, correlationState }) => {
   );
   return redirectUrl;
 };
+
+export async function getDesignExportJobStatus(exportId, token) {
+  const userClient = getUserClient(token);
+  const result = await ExportService.getDesignExportJob({
+    client: userClient,
+    path: {
+      exportId,
+    },
+  });
+
+  if (result.error) {
+    console.error(result.error);
+    throw new Error(result.error.message);
+  }
+
+  return result.data;
+}
+
+export async function syncImageDesignWithCanva(designId, newAssetURL) {
+  try {
+    const url = new URL("/api/canva/image/" + designId, ENDPOINT);
+    const response = await fetch(url, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        designId,
+        newAssetURL,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+  } catch (err) {
+    console.log(err);
+  }
+}

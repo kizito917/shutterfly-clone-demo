@@ -80,19 +80,6 @@ async function getAccessTokenForUser(id) {
   return refreshedToken.access_token;
 }
 
-const cookieAuth = async (req, res, next, db) => {
-  try {
-    const token = await getAccessTokenForUser(
-      req.signedCookies[AUTH_COOKIE_NAME],
-      db
-    );
-    req.token = token;
-  } catch (error) {
-    return res.status(401).send("Unauthorized");
-  }
-  next();
-};
-
 function getAuthorizationUrl(redirectUri, state, codeChallenge) {
   const scopes = [
     "asset:read",
@@ -241,7 +228,6 @@ module.exports = {
   AUTH_COOKIE_NAME,
   OAUTH_STATE_COOKIE_NAME,
   OAUTH_CODE_VERIFIER_COOKIE_NAME,
-  cookieAuth,
   setToken,
   getToken,
   deleteToken,
