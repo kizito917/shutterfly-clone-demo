@@ -11,6 +11,8 @@ import {
 import { ConnectButton } from "../components/connect-button";
 import EditInCanvasButton from "../components/edit-button";
 import { useAppStore } from "../store";
+import { poll } from "../utils/poll";
+import { getDesignExportJobStatus } from "../services/canvaService";
 
 export default function CanvaEditor() {
   const params = useParams();
@@ -30,16 +32,56 @@ export default function CanvaEditor() {
     setImageUrl(imageUrl);
   };
 
+  const checkAndProcessReturn = async () => {
+    const params = new URLSearchParams(location.search);
+    const jobId = params.get("jobId");
+    const designId = params.get("designId");
+
+    if (jobId && designId) {
+      const result = await poll(() =>
+        getDesignExportJobStatus(jobId, canvaToken)
+      );
+
+      if (result.job.status === "success") {
+        const fileUrl = result.job.urls[0];
+        if (!fileUrl) {
+          throw new Error("Failed to get export");
+        }
+
+        // Fetch and update db with image (replace)
+        const response = await fetch(fileUrl);
+        const data = await response.arrayBuffer();
+        const imageUrl = window.URL.createObjectURL(new Blob([data]));
+        setImageUrl(imageUrl);
+
+        // Notify bacckend
+        await syncImageDesignWithCanva(designId, fileUrl);
+
+        history.replaceState(null, '', location.pathname)
+      }
+      return Promise.resolve();
+    }
+  };
+
   useEffect(() => {
-    retrieveImageInfo(params.imageId)
-      .then((res) => {
-        setDesign(res.data);
-        if(res.data.canvaDesignViewUrl) return setImageUrl(res.data.canvaDesignViewUrl);
-        getImage(res.data.id)
-      })
-      .catch((err) => {
+    if (canvaToken) checkAndProcessReturn();
+  }, [canvaToken]);
+
+  useEffect(() => {
+    (async function () {
+      try {
+        const res = await retrieveImageInfo(params.imageId);
+        if (res.data) {
+          setDesign(res.data);
+          if (res.data.canvaDesignViewUrl) {
+            return setImageUrl(res.data.canvaDesignViewUrl);
+          }
+          getImage(res.data.id);
+        }
+      } catch (err) {
         console.error("Err", err);
-      });
+      }
+    })();
   }, []);
 
   return (

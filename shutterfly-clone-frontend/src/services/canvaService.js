@@ -1,6 +1,6 @@
 import { createClient } from "@hey-api/client-fetch";
 import { poll } from "../utils/poll";
-import { AssetService, client, DesignService } from "./apiService";
+import { AssetService, client, DesignService, ExportService } from "./apiService";
 
 const ENDPOINT = import.meta.env.VITE_APP_API_URL;
 
@@ -230,3 +230,20 @@ export const createNavigateToCanvaUrl = ({ editUrl, correlationState }) => {
   );
   return redirectUrl;
 };
+
+export async function getDesignExportJobStatus(exportId, token) {
+  const userClient = getUserClient(token);
+  const result = await ExportService.getDesignExportJob({
+    client: userClient,
+    path: {
+      exportId,
+    },
+  });
+
+  if (result.error) {
+    console.error(result.error);
+    throw new Error(result.error.message);
+  }
+
+  return result.data;
+}
