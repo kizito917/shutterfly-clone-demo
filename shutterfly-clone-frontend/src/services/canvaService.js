@@ -156,6 +156,8 @@ export const uploadAssetAndCreateDesign = async (design, token) => {
     credentials: "include",
     body: JSON.stringify(design),
   });
+  console.log("CREATE DESIGN RESPONSE", response);
+  console.log("RESPONSE STATUS", response.status);
 
   if (!response.ok) {
     throw new Error(`HTTP error! Status: ${response.status}`);
