@@ -158,6 +158,7 @@ export const uploadAssetAndCreateDesign = async (design, token) => {
   });
 
   if (!response.ok) {
+    console.log("THROWING AN ERROR HERE");
     throw new Error(`HTTP error! Status: ${response.status}`);
   }
 
