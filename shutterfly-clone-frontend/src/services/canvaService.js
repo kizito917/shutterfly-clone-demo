@@ -70,6 +70,12 @@ export const revoke = async () => {
 };
 
 function getUserClient(token) {
+  console.log("CANVA API URL from env:", import.meta.env.VITE_APP_BASE_CANVA_CONNECT_API_URL);
+
+  if (!import.meta.env.VITE_APP_BASE_CANVA_CONNECT_API_URL) {
+    console.error("WARNING: Canva API URL environment variable is not set!");
+  }
+
   const localClient = createClient({
     headers: {
       Authorization: `Bearer ${token}`,
