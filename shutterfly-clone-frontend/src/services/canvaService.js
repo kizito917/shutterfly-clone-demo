@@ -130,6 +130,7 @@ const getAssetUploadJob = async (jobId, token) => {
     throw new Error(result.error.message);
   }
 
+  console.log("ASSET UPLOAD DATA RESPONSE", result.data);
   return result.data;
 };
 
