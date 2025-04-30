@@ -14,6 +14,7 @@ export const ConnectButton = () => {
   useEffect(() => {
     checkForAccessToken()
       .then((result) => {
+        console.log("ACCESS TOKEN FROM RESULT RESULTTTTT", result);
         if (result.token) {
           setCanvaToken(result.token);
           setIsAuthorized(true);
@@ -30,6 +31,7 @@ export const ConnectButton = () => {
     try {
       setIsLoading(true);
       const result = await getCanvaAuthorization();
+      console.log("RESULTTTTT", result);
 
       if (result) {
         setCanvaToken(result);
