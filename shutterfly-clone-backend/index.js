@@ -29,6 +29,7 @@ const corsOptions = {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(`${__dirname}`));
 app.use(cors(corsOptions));
 app.use(cookieParser(process.env.DATABASE_ENCRYPTION_KEY))
 app.use(passport.initialize());

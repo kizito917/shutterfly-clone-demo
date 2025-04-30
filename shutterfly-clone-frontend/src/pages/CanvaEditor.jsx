@@ -12,7 +12,7 @@ import { ConnectButton } from "../components/connect-button";
 import EditInCanvasButton from "../components/edit-button";
 import { useAppStore } from "../store";
 
-export default function Editor2() {
+export default function CanvaEditor() {
   const params = useParams();
   const [design, setDesign] = useState({});
   const [imageUrl, setImageUrl] = useState(null);
