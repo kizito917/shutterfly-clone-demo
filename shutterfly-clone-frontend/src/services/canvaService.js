@@ -54,6 +54,7 @@ export const checkForAccessToken = async () => {
   if (!response.ok) {
     return { token: undefined };
   }
+
   return { token: await response.text() };
 };
 
