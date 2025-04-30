@@ -120,6 +120,7 @@ const updateImageDesign = async (imageId, body) => {
 };
 
 const getAssetUploadJob = async (jobId, token) => {
+  console.log("CLIENT DATAAAAA", getUserClient(token));
   const result = await AssetService.getAssetUploadJob({
     client: getUserClient(token),
     path: { jobId },
