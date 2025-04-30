@@ -70,12 +70,6 @@ export const revoke = async () => {
 };
 
 function getUserClient(token) {
-  console.log("CANVA API URL from env:", import.meta.env.VITE_APP_BASE_CANVA_CONNECT_API_URL);
-
-  if (!import.meta.env.VITE_APP_BASE_CANVA_CONNECT_API_URL) {
-    console.error("WARNING: Canva API URL environment variable is not set!");
-  }
-
   const localClient = createClient({
     headers: {
       Authorization: `Bearer ${token}`,
@@ -120,31 +114,26 @@ const updateImageDesign = async (imageId, body) => {
     const responseBody = await response.json();
     return responseBody;
   } catch (error) {
-    console.error("Error:", error);
     throw error;
   }
 };
 
 const getAssetUploadJob = async (jobId, token) => {
-  console.log("CLIENT DATAAAAA", getUserClient(token));
   const result = await AssetService.getAssetUploadJob({
     client: getUserClient(token),
     path: { jobId },
   });
 
   if (result.error) {
-    console.error("getAssetUploadJob error", result.error);
     throw new Error(result.error.message);
   }
 
-  console.log("ASSET UPLOAD DATA RESPONSE", result.data);
   return result.data;
 };
 
 const pollAssetUpload = async (jobId, token) => {
   console.log("Job ID", jobId);
   const response = await poll(() => getAssetUploadJob(jobId, token));
-  console.log("POLL ASSET UPLOAD VALUE", response);
 
   if (!response.job.asset) {
     throw new Error(
@@ -167,19 +156,16 @@ export const uploadAssetAndCreateDesign = async (design, token) => {
   });
 
   if (!response.ok) {
-    console.log("THROWING AN ERROR HERE");
     throw new Error(`HTTP error! Status: ${response.status}`);
   }
 
   const uploadJob = await response.json();
 
   if (uploadJob.error) {
-    console.error("Upload job error", uploadJob.error);
     throw new Error(uploadJob.error.message);
   }
 
   const asset = await pollAssetUpload(uploadJob.data.job.id, token);
-  console.log("ASSETS VALUE", asset);
 
   if (!asset) {
     throw new Error(
@@ -201,13 +187,10 @@ export const uploadAssetAndCreateDesign = async (design, token) => {
   }
 
   const createDesignResultData = createDesignResult.data;
-  console.log("CREATE DESIGN RESULT DATA", createDesignResultData);
 
   if (!createDesignResultData) {
     throw new Error("Unable to create design");
   }
-
-  console.log(createDesignResultData, design);
 
   // TODO: Save link to db
   await updateImageDesign(design.id, {

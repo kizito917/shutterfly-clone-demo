@@ -14,7 +14,6 @@ export const poll = async (
   const pollJob = async (attempt = 0) => {
     const delayMs = exponentialDelay(attempt);
     const statusResult = await job();
-    console.log("STATUS RESULT FROM JOB+++++++", statusResult)
 
     const status = statusResult.job.status.toLocaleLowerCase();
 
