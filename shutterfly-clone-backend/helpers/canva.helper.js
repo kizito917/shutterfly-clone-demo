@@ -180,63 +180,6 @@ function getUserClient(token) {
   return localClient;
 }
 
-async function getDesignExportJobStatus(exportId, userClient) {
-  const result = await ExportService.getDesignExportJob({
-    client: userClient,
-    path: {
-      exportId,
-    },
-  });
-
-  if (result.error) {
-    console.error(result.error);
-    throw new Error(result.error.message);
-  }
-
-  const jobData = result.data;
-  console.log("JOB DATA", jobData)
-  
-  // TODO: Execute actual task
-
-  return jobData;
-}
-
-function poll(
-  job, // () => Promise<T>,
-  opts = {}
-) {
-  const {
-    initialDelayMs = 500,
-    increaseFactor = 1.6,
-    maxDelayMs = 10 * 1_000,
-  } = opts;
-
-  const exponentialDelay = (n) =>
-    Math.min(initialDelayMs * Math.pow(increaseFactor, n), maxDelayMs);
-
-  const pollJob = async (attempt = 0) => {
-    const delayMs = exponentialDelay(attempt);
-    const statusResult = await job();
-
-    const status = statusResult.job.status.toLocaleLowerCase();
-
-    switch (status) {
-      case "success":
-      case "failed":
-        return statusResult;
-      case "in_progress":
-        await new Promise((resolve) => {
-          setTimeout(resolve, delayMs);
-        });
-        return pollJob(attempt + 1);
-      default:
-        throw new Error(`Unknown job status ${status}`);
-    }
-  };
-
-  return pollJob();
-}
-
 module.exports = {
   AUTH_COOKIE_NAME,
   OAUTH_STATE_COOKIE_NAME,
@@ -249,6 +192,4 @@ module.exports = {
   getBasicAuthClient,
   getAccessTokenForUser,
   getUserClient,
-  poll,
-  getDesignExportJobStatus,
 };

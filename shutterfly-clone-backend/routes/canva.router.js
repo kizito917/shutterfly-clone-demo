@@ -11,12 +11,10 @@ const {
     OAUTH_CODE_VERIFIER_COOKIE_NAME,
     getBasicAuthClient,
     setToken,
-    getAccessTokenForUser,
     getUserClient,
     getToken,
     deleteToken,
     poll,
-    getDesignExportJobStatus,
 } = require("../helpers/canva.helper");
 const {
     OauthService,
@@ -24,13 +22,10 @@ const {
     client: DefaultClient,
     ExportService,
 } = require("../services/canva.service");
-const { encrypt } = require("../helpers/crypto.helper");
 const db = require("../models");
 const { checkValidity } = require("../middlewares/checkValidity");
 const { checkCanvaAuth } = require("../middlewares/checkCanvaAuth");
 const { apiResponse } = require("../helpers/apiResponse.helper");
-const { createClient } = require("@hey-api/client-fetch");
-const { Worker } = require("worker_threads");
 
 const endpoints = {
     REDIRECT: "/oauth/redirect",
@@ -410,24 +405,50 @@ router.get("/return-nav", async (req, res) => {
             throw new Error(exportJobResponse.error.message);
         }
 
-        const worker = new Worker(
-            path.join(__dirname, "../", "worker", "canva.worker.js"),
-            {
-                workerData: {
-                jobId: exportJobResponse.data.job.id,
-                token: userToken.access_token,
-                designId: designId,
-                },
-            }
-        );
-        worker.on("message", () => {
-            worker.terminate();
-        });
-        res.redirect(process.env.FRONTEND_URL + "/editor2/" + designId);
+        const redirectUri = new URL("/canva-editor/" + designId, process.env.FRONTEND_URL);
+        redirectUri.searchParams.set("jobId", exportJobResponse.data.job.id);
+        redirectUri.searchParams.set("designId", designId);
+        res.redirect(redirectUri.toString());
     } catch (error) {
         console.error(error);
         throw error;
     }
 });
+
+router.patch("/image/:imageId", async (req, res) => {
+    try {
+      const { newAssetURL } = req.body;
+      if (!newAssetURL) {
+        return apiResponse(
+          "Error",
+          "Provide designId, newAssetURL",
+          null,
+          400,
+          res
+        );
+      }
+  
+      const response = await fetch(newAssetURL);
+      const buffer = await response.arrayBuffer();
+      const design = await db.UserImage.findOne({
+        where: { id: req.params.imageId },
+      });
+
+      if(!design) return apiResponse("Error", "Image Design not found", null, 404, res);
+  
+      const assetPath = path.join(
+        __dirname,
+        "..",
+        "assets",
+        "images",
+        path.basename(design.imagePath)
+      );
+      await fs.writeFile(assetPath, Buffer.from(buffer));
+      return apiResponse("Success", "Update successful", null, 200, res);
+    } catch (err) {
+      console.log(err);
+      return apiResponse("Error", "Internal server error", null, 500, res);
+    }
+  })
 
 module.exports = router;
