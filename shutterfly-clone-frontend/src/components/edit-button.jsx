@@ -49,7 +49,7 @@ function EditInCanvasButton({ design }) {
         ? "Redirecting..."
         : isLoading
         ? "Loading..."
-        : "EDIT IN CANVAS"}
+        : "EDIT IN CANVA"}
     </button>
   );
 }
