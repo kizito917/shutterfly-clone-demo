@@ -247,3 +247,26 @@ export async function getDesignExportJobStatus(exportId, token) {
 
   return result.data;
 }
+
+export async function syncImageDesignWithCanva(designId, newAssetURL) {
+  try {
+    const url = new URL("/api/canva/image/" + designId, ENDPOINT);
+    const response = await fetch(url, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        designId,
+        newAssetURL,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+  } catch (err) {
+    console.log(err);
+  }
+}
