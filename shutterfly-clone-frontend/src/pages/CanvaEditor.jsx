@@ -12,7 +12,7 @@ import { ConnectButton } from "../components/connect-button";
 import EditInCanvasButton from "../components/edit-button";
 import { useAppStore } from "../store";
 import { poll } from "../utils/poll";
-import { getDesignExportJobStatus } from "../services/canvaService";
+import { getDesignExportJobStatus, syncImageDesignWithCanva } from "../services/canvaService";
 
 export default function CanvaEditor() {
   const params = useParams();
