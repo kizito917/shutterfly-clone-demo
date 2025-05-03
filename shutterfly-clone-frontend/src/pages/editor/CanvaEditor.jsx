@@ -1,6 +1,6 @@
 // External imports
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Download, ShoppingCart } from 'lucide-react';
 
@@ -14,9 +14,11 @@ import EditInCanvasButton from "../../components/edit-button";
 import { useAppStore } from "../../store";
 import { poll } from "../../utils/poll";
 import { getDesignExportJobStatus, syncImageDesignWithCanva } from "../../services/canvaService";
+import { processCheckout } from "../../services/payment";
 
 export default function CanvaEditor() {
     const params = useParams();
+    const [searchParams] = useSearchParams();
     const { canvaToken } = useAppStore();
 
     const [design, setDesign] = useState({});
@@ -71,6 +73,14 @@ export default function CanvaEditor() {
     }, [canvaToken]);
 
     useEffect(() => {
+        const paymentSuccess = searchParams.get("payment-success");
+        const orderId = searchParams.get("orderId");
+        if (paymentSuccess && orderId) {
+            // process order details retrieval to allow for download
+        }
+    }, []);
+
+    useEffect(() => {
         (async function () {
             try {
                 const res = await retrieveImageInfo(params.imageId);
@@ -89,28 +99,18 @@ export default function CanvaEditor() {
 
     const handleCheckout = async () => {
         setIsLoading(true);
-        
-        // try {
-        //   // This would be your API call to create a Stripe checkout session
-        //   const response = await fetch('/api/create-checkout-session', {
-        //     method: 'POST',
-        //     headers: {
-        //       'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify({
-        //       designId: 'demo-design-123',
-        //       price: 1000, // $10.00 in cents
-        //     }),
-        //   });
-          
-        //   const session = await response.json();
-          
-        //   // Redirect to Stripe Checkout
-        //   window.location.href = session.url;
-        // } catch (error) {
-        //   console.error('Checkout error:', error);
-        //   setIsLoading(false);
-        // }
+        const { status, message, data } =await processCheckout({
+            designId: params.imageId
+        });
+
+        if (status !== 200) {
+            setIsLoading(false);
+            toast.error(message);
+            return;
+        }
+
+        setIsLoading(false);
+        window.location.href = data.sessionUrl
     };
 
     return (

@@ -30,9 +30,9 @@ export default function CheckoutSuccess() {
                         </p>
                         
                         {/* CTA Button */}
-                        <a href="/profile" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md flex items-center justify-center transition-colors duration-300 text-lg">
+                        <a href="#" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md flex items-center justify-center transition-colors duration-300 text-lg">
                             <User className="h-5 w-5 mr-2" />
-                            Return to Profile
+                            View Orders
                         </a>
                     </div>
                 </div>

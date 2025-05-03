@@ -52,6 +52,7 @@ const createCheckoutSession = async (req, res) => {
                 },
             ],
             mode: 'payment',
+            // success_url: `${process.env.FRONTEND_URL}/canva-editor/${designId}?payment-success=${true}&orderId=${order.id}`,
             success_url: `${process.env.FRONTEND_URL}/checkout-success`,
             cancel_url: `${process.env.FRONTEND_URL}/checkout-failure`,
             metadata: {

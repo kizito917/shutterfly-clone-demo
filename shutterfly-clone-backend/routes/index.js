@@ -7,6 +7,7 @@ const fileRoute = require('./file.router');
 const profileRoute = require('./profile.router');
 const canvaRoute = require('./canva.router');
 const paymentRoute = require('./payment.router');
+const orderRoute = require('./order.router');
 
 const router = Router();
 
@@ -15,5 +16,6 @@ router.use('/file', fileRoute);
 router.use('/profile', profileRoute);
 router.use('/canva', canvaRoute);
 router.use('/payment', paymentRoute);
+router.use('/order', orderRoute);
 
 module.exports = router;
