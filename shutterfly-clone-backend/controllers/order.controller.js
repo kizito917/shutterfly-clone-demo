@@ -10,7 +10,7 @@ const retrieveUserOrders = async (req, res) => {
             },
             include: [
                 {
-                    model: 'OrderItem',
+                    model: db.OrderItem,
                     as: 'orderItem'
                 }
             ]
@@ -30,7 +30,7 @@ const retrieveOrderDetails = async (req, res) => {
             where: { id },
             include: [
                 {
-                    model: 'OrderItem',
+                    model: db.OrderItem,
                     as: 'orderItem'
                 }
             ]
