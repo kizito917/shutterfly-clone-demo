@@ -12,6 +12,7 @@ import Editor from "./pages/editor/Editor"
 import CanvaEditor from "./pages/editor/CanvaEditor"
 import Profile from "./pages/Profile"
 import CheckoutSuccess from "./pages/checkout/CheckoutSuccess"
+import CheckoutFailure from "./pages/checkout/CheckoutFailure"
 
 function App() {
     return (
@@ -28,6 +29,7 @@ function App() {
                 <Route path="/canva-editor/:imageId" element={<CanvaEditor />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/checkout-success" element={<CheckoutSuccess />} />
+                <Route path="/checkout-failure" element={<CheckoutFailure />} />
             </Routes>
         </>
     )
