@@ -8,9 +8,10 @@ import Home from "./pages/Home"
 import Signup from "./pages/onboarding/Signup"
 import Signin from "./pages/onboarding/Signin"
 import SigninSuccess from "./pages/onboarding/SigninSuccess"
-import Editor from "./pages/Editor"
-import CanvaEditor from "./pages/CanvaEditor"
+import Editor from "./pages/editor/Editor"
+import CanvaEditor from "./pages/editor/CanvaEditor"
 import Profile from "./pages/Profile"
+import CheckoutSuccess from "./pages/checkout/CheckoutSuccess"
 
 function App() {
     return (
@@ -26,6 +27,7 @@ function App() {
                 <Route path="/editor/:imageId" element={<Editor />} />
                 <Route path="/canva-editor/:imageId" element={<CanvaEditor />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/checkout-success" element={<CheckoutSuccess />} />
             </Routes>
         </>
     )

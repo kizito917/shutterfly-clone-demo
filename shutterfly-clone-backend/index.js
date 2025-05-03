@@ -11,6 +11,7 @@ dotenv.config();
 // Internal imports
 const routes = require('./routes/index');
 const configurePassport = require('./config/passport');
+const webhookRoute = require('./routes/webhook.router');
 
 const app = express();
 const port = process.env.PORT;
@@ -27,6 +28,7 @@ const corsOptions = {
     credentials: true,
 };
 
+app.use('/webhook', express.raw({ type: 'application/json' }), webhookRoute);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname)));

@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import ImageFilter from 'react-image-filter';
 
 // Internal imports
-import { retrieveRequestedImage } from "../services/imageService";
+import { retrieveRequestedImage } from "../../services/imageService";
 
 export default function Editor() {
     const params = useParams();
