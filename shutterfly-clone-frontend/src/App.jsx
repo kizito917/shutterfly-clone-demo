@@ -10,9 +10,10 @@ import Signin from "./pages/onboarding/Signin"
 import SigninSuccess from "./pages/onboarding/SigninSuccess"
 import Editor from "./pages/editor/Editor"
 import CanvaEditor from "./pages/editor/CanvaEditor"
-import Profile from "./pages/Profile"
+import Profile from "./pages/profile/Profile"
 import CheckoutSuccess from "./pages/checkout/CheckoutSuccess"
 import CheckoutFailure from "./pages/checkout/CheckoutFailure"
+import Order from "./pages/profile/Order"
 
 function App() {
     return (
@@ -30,6 +31,7 @@ function App() {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/checkout-success" element={<CheckoutSuccess />} />
                 <Route path="/checkout-failure" element={<CheckoutFailure />} />
+                <Route path="/orders" element={<Order />} />
             </Routes>
         </>
     )

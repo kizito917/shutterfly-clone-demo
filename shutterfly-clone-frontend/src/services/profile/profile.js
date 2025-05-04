@@ -1,4 +1,4 @@
-import { Axios } from "../helpers/axiosHelper";
+import { Axios } from "../../helpers/axiosHelper";
 
 let status;
 let message;

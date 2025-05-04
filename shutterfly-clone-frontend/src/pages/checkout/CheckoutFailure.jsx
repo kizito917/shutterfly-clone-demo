@@ -31,10 +31,10 @@ export default function CheckoutFailure() {
                         
                         {/* CTA Buttons */}
                         <div className="space-y-4">
-                            <button className="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-3 px-4 rounded-md flex items-center justify-center transition-colors duration-300">
+                            <a href="/profile" className="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-3 px-4 rounded-md flex items-center justify-center transition-colors duration-300">
                                 <ArrowLeft className="h-5 w-5 mr-2" />
                                 Back to Profile
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>

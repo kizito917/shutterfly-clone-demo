@@ -14,7 +14,7 @@ import EditInCanvasButton from "../../components/edit-button";
 import { useAppStore } from "../../store";
 import { poll } from "../../utils/poll";
 import { getDesignExportJobStatus, syncImageDesignWithCanva } from "../../services/canvaService";
-import { processCheckout } from "../../services/payment";
+import { processCheckout } from "../../services/profile/payment";
 
 export default function CanvaEditor() {
     const params = useParams();

@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 
 // Internal Imports
 import { LocalStorage } from "../../helpers/localstorageHelper";
-import { fetchProfile } from '../../services/profile';
+import { fetchProfile } from '../../services/profile/profile';
 
 const SignInProcessor = () => {
   const navigate = useNavigate();

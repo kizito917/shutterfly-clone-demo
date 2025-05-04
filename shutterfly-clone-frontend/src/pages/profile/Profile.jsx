@@ -4,7 +4,7 @@ import { User, Mail, Calendar, RefreshCw, Image } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 // Internal imports
-import { fetchProfile } from '../services/profile';
+import { fetchProfile } from '../../services/profile/profile';
 
 export default function Profile() {
     const [user, setUser] = useState({} || null);
