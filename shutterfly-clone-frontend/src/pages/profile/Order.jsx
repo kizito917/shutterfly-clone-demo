@@ -5,6 +5,7 @@ import { Calendar, Clock, Package, DollarSign, ChevronDown, ChevronUp, Search } 
 
 // Internal imports
 import { retrieveUserOrders } from '../../services/profile/order';
+import { formatDate, formatTime } from "../../helpers/globalHelper";
 
 export default function Order() {
     const [orders, setOrders] = useState([]);
@@ -26,25 +27,6 @@ export default function Order() {
 
         fetchUserOrder();
     }, []);
-
-    // Function to format date to readable format
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
-    };
-  
-    // Function to format time to readable format
-    const formatTime = (dateString) => {
-        const date = new Date(dateString);
-        return date.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
     
     // Handle order expansion
     const toggleOrderDetails = (orderId) => {
@@ -183,14 +165,14 @@ export default function Order() {
                                     
                                         {/* Action Buttons */}
                                         <div className="mt-4 flex gap-2 justify-end">
-                                            <button className="px-4 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                                            <a href={`/order/${order.id}`} className="px-4 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
                                                 View Details
-                                            </button>
-                                            {order.status === 'completed' && (
+                                            </a>
+                                            {/* {order.status === 'completed' && (
                                                 <button className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                                                     Reorder
                                                 </button>
-                                            )}
+                                            )} */}
                                         </div>
                                     </div>
                                 )}
