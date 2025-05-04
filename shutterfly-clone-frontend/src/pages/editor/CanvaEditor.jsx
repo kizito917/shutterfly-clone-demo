@@ -115,14 +115,14 @@ export default function CanvaEditor() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <div className="w-[80%] mx-auto px-4 py-8">
+            <div className="w-[98%] lg:w-[80%] mx-auto px-4 py-8">
                 <div className="flex gap-3 mt-10">
                     <ConnectButton />
                     {canvaToken ? <EditInCanvasButton design={design} /> : null}
                 </div>
-                <div className="flex gap-8">
-                    {/* Center Image Area */}
-                    <div className="flex-1 flex flex-col items-center justify-center bg-white rounded-xl p-8 max-h-[900px]">
+                <div className="flex flex-col md:flex-row md:gap-8">
+                    {/* Center Image Area - Full width on mobile, flex-1 on desktop */}
+                    <div className="w-full md:flex-1 flex flex-col items-center justify-center bg-white rounded-xl p-4 md:p-8 max-h-[900px] mb-6 md:mb-0">
                         <div className="relative w-full h-full flex items-center justify-center">
                             <img
                                 src={imageUrl}
@@ -131,8 +131,10 @@ export default function CanvaEditor() {
                             />
                         </div>
                     </div>
-                    <div>
-                        <div className="flex flex-col sm:flex-row gap-4">
+                    
+                    {/* Purchase info section - Full width on mobile */}
+                    <div className="w-full md:w-auto">
+                        <div className="flex flex-col gap-4 mb-4">
                             <button
                                 onClick={handleCheckout}
                                 disabled={isLoading}
@@ -153,7 +155,7 @@ export default function CanvaEditor() {
                                 <span>Preview Sample</span>
                             </button>
                         </div>
-                        <div className="border-t border-gray-200 p-6 bg-gray-50">
+                        <div className="border-t border-gray-200 p-6 bg-gray-50 rounded-md">
                             <h3 className="font-semibold mb-2">What's included:</h3>
                             <ul className="text-gray-600 space-y-1">
                                 <li>✓ High resolution image download</li>
