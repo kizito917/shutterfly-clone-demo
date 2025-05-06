@@ -7,9 +7,10 @@ const { apiResponse } = require("../helpers/apiResponse.helper");
 
 const createCheckoutSession = async (req, res) => {
     const transaction = await db.sequelize.transaction();
-    const price = 10
+    let price = 10;
+
     try {
-        const { designId } = req.body;
+        const { designId, product, productItem } = req.body;
 
         const designDetail = await db.UserImage.findOne({
             where: {id: designId}
@@ -19,6 +20,21 @@ const createCheckoutSession = async (req, res) => {
             return apiResponse("Error", "Design not found. Kindly provide correct ID", null, 404, res);
         }
 
+        // Verify product is valid
+        const productData = await db.Product.findOne({
+            where: { id: product }
+        });
+
+        if (!productData) {
+            return apiResponse("Error", "Product not found. Kindly provide correct ID", null, 404, res);
+        }
+
+        const productItemDetails = await db.ProductItem.findOne({
+            where: { id: productItem }
+        });
+
+        price += parseInt(productItemDetails.shippingPrice, 10);
+
         // Create pending order
         const order = await db.Order.create({
             userId: req.user.id,
@@ -26,6 +42,8 @@ const createCheckoutSession = async (req, res) => {
             amount: price
         }, { transaction });
 
+
+        // TODO: MODIFY ORDER ITEM ATTRIBUTES TO INCLUDE SHIPPING PRODUCT AND SHIPPING PPRODUCT ID
         // Create order item
         await db.OrderItem.create({
             orderId: order.id,
@@ -79,6 +97,7 @@ const createCheckoutSession = async (req, res) => {
 
         return apiResponse("Success", "Checkout process successfully initialized", returnPayload, 200, res);
     } catch (err) {
+        console.log(err);
         await transaction.rollback();
         return apiResponse("Error", "Unable to process checkout!", err, 500, res);
     }
