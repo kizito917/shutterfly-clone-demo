@@ -4,6 +4,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 // Internal imports
 const db = require("../models/index");
 const { apiResponse } = require("../helpers/apiResponse.helper");
+const { createShippingOrder } = require('../helpers/shipping.helper');
 
 const createCheckoutSession = async (req, res) => {
     const transaction = await db.sequelize.transaction();
@@ -39,17 +40,18 @@ const createCheckoutSession = async (req, res) => {
         const order = await db.Order.create({
             userId: req.user.id,
             status: 'pending',
-            amount: price
+            amount: price,
         }, { transaction });
 
-
-        // TODO: MODIFY ORDER ITEM ATTRIBUTES TO INCLUDE SHIPPING PRODUCT AND SHIPPING PPRODUCT ID
         // Create order item
         await db.OrderItem.create({
             orderId: order.id,
             designId: designId,
             quantity: 1,
-            price: price
+            price: price,
+            shippingProductChoice: product,
+            shippingProductItemChoice: productItem,
+            shippingOrderId: null
         }, { transaction });
 
         // Create checkout url
@@ -117,26 +119,96 @@ const processPaymentWebhook = async (req, res) => {
     }
 
     if (event.type === 'checkout.session.completed') {
-        const session = event.data.object;
-        
-        // Retrieve the session metadata
-        const { designId, userId } = session.metadata;
-        
-        await db.Order.update({
-            status: 'completed'
-        }, {
-            where: {
-                userId
-            }
-        });
+        try {
+            const transaction = await db.sequelize.transaction();
+            const session = event.data.object;
+            
+            // Retrieve the session metadata
+            const { designId, userId, orderId } = session.metadata;
+            
+            await db.Order.update({
+                status: 'completed'
+            }, {
+                where: {
+                    userId,
+                    id: orderId
+                }
+            }, { transaction });
 
-        await db.Payment.update({
-            status: 'paid'
-        }, {
-            where: {
-                stripeSessionId: session.id
-            }
-        });
+            await db.Payment.update({
+                status: 'paid'
+            }, {
+                where: {
+                    stripeSessionId: session.id
+                }
+            }, { transaction });
+
+            // retrieve user profile details
+            const user = await db.User.findOne({
+                where: {
+                    id: userId
+                }
+            });
+
+            // process shipping of product (get all order items of an order)
+            const orderItems = await db.OrderItem.findAll({
+                where: {
+                    orderId
+                }
+            });
+
+            orderItems.forEach(async (order) => {
+                const product = await db.ProductItem.findOne({
+                    where: {id: order.shippingProductItemChoice}
+                });
+
+                const assetsData = await db.UserImage.findOne({
+                    where: { id: order.designId } 
+                })
+
+                const shippingPayload = {
+                    merchantReference: `#${order.designId}`,
+                    shippingMethod: "Budget",
+                    recipient: {
+                        address: {
+                            line1: "23rd avenue, lanchaster",
+                            postalOrZipCode: "91404",
+                            countryCode: "US",
+                            townOrCity: "Dallas",
+                            stateOrCounty: "Texas"
+                        },
+                        name: `${user.firstName} ${user.lastName}`
+                    },
+                    items: [
+                        {
+                            merchantReference: `#${order.designId}`,
+                            sku: product.sku,
+                            copies: 1,
+                            sizing: "fillPrintArea",
+                            assets: [
+                                {
+                                    "printArea": "Default",
+                                    "url": `${process.env.BACKEND_URL}/${assetsData.imagePath}`
+                                }
+                            ]
+                        }
+                    ],
+                    metadata: {}
+                }
+
+                const shippingCreationResult = await createShippingOrder(shippingPayload);
+                await db.OrderItem.update({
+                    shippingOrderId: shippingCreationResult.order.id
+                }, {
+                    where: { id: order.id }
+                }, { transaction });
+            });
+
+            await transaction.commit();
+        } catch (err) {
+            console.log("Error executing checkout.session.completed operations");
+            await transaction.rollback();
+        }
     }
 
     if (event.type === 'checkout.session.async_payment_failed') {
