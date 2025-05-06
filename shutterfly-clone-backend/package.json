@@ -7,7 +7,9 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "migrate": "npx sequelize-cli db:migrate",
-    "down": "npx sequelize-cli db:migrate:undo"
+    "down": "npx sequelize-cli db:migrate:undo",
+    "seed": "npx sequelize-cli db:seed:all",
+    "seed:undo": "npx sequelize-cli db:seed:undo:all"
   },
   "author": "Kizito917",
   "license": "ISC",

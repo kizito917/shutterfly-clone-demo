@@ -47,7 +47,7 @@ app.get('/', (req, res) => {
 configurePassport();
 
 try {
-    app.listen(port, () => {
+    app.listen(port, async () => {
         console.log(`Server is running on port ${port}`);
     })
 } catch (err) {

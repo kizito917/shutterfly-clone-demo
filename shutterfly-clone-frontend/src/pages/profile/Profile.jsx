@@ -18,7 +18,6 @@ export default function Profile() {
             }
 
             setUser(data);
-            console.log(data);
         }
 
         fetchUserProfile();
