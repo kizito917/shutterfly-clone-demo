@@ -56,6 +56,7 @@ export default function CanvaEditor() {
     const [productItems, setProductItems] = useState([]);
     const [filteredProductItems, setFilteredProductItems] = useState([]);
     const [productAmount, setProductAmount] = useState(10);
+    const [isChecked, setIsChecked] = useState(false);
     
     const getImage = async (imageId) => {
         const { status, message, data } = await retrieveRequestedImage(imageId);
@@ -152,10 +153,36 @@ export default function CanvaEditor() {
         setProductAmount(productAmount + shippingCost);
     }
 
+    const handleCheckboxChange = (event) => {
+        setIsChecked(event.target.checked);
+    };
+
+    const handleItemPurchase = async () => {
+        console.log(isChecked);
+        if (isChecked) {
+            setIsModalOpen(true);
+        } else {
+            // process payment without shipping flow added
+            setIsLoading(true);
+            const { status, message, data } = await processCheckout({
+                designId: params.imageId
+            });
+
+            if (status !== 200) {
+                setIsLoading(false);
+                toast.error(message);
+                return;
+            }
+
+            setIsLoading(false);
+            window.location.href = data.sessionUrl;
+        }
+    }
+
     const onSubmit = async (values) => {
         setIsLoading(true);
         values.productItem = values.productItem.id
-        const { status, message, data } =await processCheckout({
+        const { status, message, data } = await processCheckout({
             ...values,
             designId: params.imageId
         });
@@ -167,7 +194,7 @@ export default function CanvaEditor() {
         }
 
         setIsLoading(false);
-        window.location.href = data.sessionUrl
+        window.location.href = data.sessionUrl;
     };
 
     return (
@@ -192,12 +219,28 @@ export default function CanvaEditor() {
                     {/* Purchase info section - Full width on mobile */}
                     <div className="w-full md:w-auto">
                         <div className="flex flex-col gap-4 mb-4">
+                            <div>
+                                <input 
+                                    type="checkbox" 
+                                    className="mr-2"
+                                    checked={isChecked} 
+                                    onChange={handleCheckboxChange} 
+                                /> Check this box if you wish to ship the product you bought
+                            </div>
+
                             <button
-                                onClick={() => setIsModalOpen(true)}
+                                onClick={handleItemPurchase}
                                 disabled={isLoading}
                                 className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-md font-medium flex items-center justify-center gap-2 disabled:bg-blue-300"
                             >
-                                <span>Buy Now (${productAmount})</span>
+                                {isLoading ? (
+                                    <span>Processing...</span>
+                                ) : (
+                                    <>
+                                        <ShoppingCart size={20} />
+                                        <span>Buy Now (${productAmount})</span>
+                                    </>
+                                )}
                             </button>
                                     
                             <button className="bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 px-6 rounded-md font-medium flex items-center justify-center gap-2">
