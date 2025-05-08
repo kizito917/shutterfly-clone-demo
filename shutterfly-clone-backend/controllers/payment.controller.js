@@ -21,20 +21,23 @@ const createCheckoutSession = async (req, res) => {
             return apiResponse("Error", "Design not found. Kindly provide correct ID", null, 404, res);
         }
 
-        // Verify product is valid
-        const productData = await db.Product.findOne({
-            where: { id: product }
-        });
+        let productData;
+        if (product && productItem) {
+            // Verify product is valid
+            productData = await db.Product.findOne({
+                where: { id: product }
+            });
 
-        if (!productData) {
-            return apiResponse("Error", "Product not found. Kindly provide correct ID", null, 404, res);
+            if (!productData) {
+                return apiResponse("Error", "Product not found. Kindly provide correct ID", null, 404, res);
+            }
+
+            const productItemDetails = await db.ProductItem.findOne({
+                where: { id: productItem }
+            });
+
+            price += parseInt(productItemDetails.shippingPrice, 10);
         }
-
-        const productItemDetails = await db.ProductItem.findOne({
-            where: { id: productItem }
-        });
-
-        price += parseInt(productItemDetails.shippingPrice, 10);
 
         // Create pending order
         const order = await db.Order.create({
@@ -49,8 +52,8 @@ const createCheckoutSession = async (req, res) => {
             designId: designId,
             quantity: 1,
             price: price,
-            shippingProductChoice: product,
-            shippingProductItemChoice: productItem,
+            shippingProductChoice: product || null,
+            shippingProductItemChoice: productItem || null,
             shippingOrderId: null
         }, { transaction });
 
@@ -158,50 +161,52 @@ const processPaymentWebhook = async (req, res) => {
             });
 
             orderItems.forEach(async (order) => {
-                const product = await db.ProductItem.findOne({
-                    where: {id: order.shippingProductItemChoice}
-                });
+                if (order.shippingProductItemChoice) {
+                    const product = await db.ProductItem.findOne({
+                        where: {id: order.shippingProductItemChoice}
+                    });
+    
+                    const assetsData = await db.UserImage.findOne({
+                        where: { id: order.designId } 
+                    });
 
-                const assetsData = await db.UserImage.findOne({
-                    where: { id: order.designId } 
-                })
-
-                const shippingPayload = {
-                    merchantReference: `#${order.designId}`,
-                    shippingMethod: "Budget",
-                    recipient: {
-                        address: {
-                            line1: "23rd avenue, lanchaster",
-                            postalOrZipCode: "91404",
-                            countryCode: "US",
-                            townOrCity: "Dallas",
-                            stateOrCounty: "Texas"
+                    const shippingPayload = {
+                        merchantReference: `#${order.designId}`,
+                        shippingMethod: "Budget",
+                        recipient: {
+                            address: {
+                                line1: "23rd avenue, lanchaster",
+                                postalOrZipCode: "91404",
+                                countryCode: "US",
+                                townOrCity: "Dallas",
+                                stateOrCounty: "Texas"
+                            },
+                            name: `${user.firstName} ${user.lastName}`
                         },
-                        name: `${user.firstName} ${user.lastName}`
-                    },
-                    items: [
-                        {
-                            merchantReference: `#${order.designId}`,
-                            sku: product.sku,
-                            copies: 1,
-                            sizing: "fillPrintArea",
-                            assets: [
-                                {
-                                    "printArea": "Default",
-                                    "url": `${process.env.BACKEND_URL}/${assetsData.imagePath}`
-                                }
-                            ]
-                        }
-                    ],
-                    metadata: {}
+                        items: [
+                            {
+                                merchantReference: `#${order.designId}`,
+                                sku: product.sku,
+                                copies: 1,
+                                sizing: "fillPrintArea",
+                                assets: [
+                                    {
+                                        "printArea": "Default",
+                                        "url": `${process.env.BACKEND_URL}/${assetsData.imagePath}`
+                                    }
+                                ]
+                            }
+                        ],
+                        metadata: {}
+                    }
+    
+                    const shippingCreationResult = await createShippingOrder(shippingPayload);
+                    await db.OrderItem.update({
+                        shippingOrderId: shippingCreationResult.order.id
+                    }, {
+                        where: { id: order.id }
+                    }, { transaction });
                 }
-
-                const shippingCreationResult = await createShippingOrder(shippingPayload);
-                await db.OrderItem.update({
-                    shippingOrderId: shippingCreationResult.order.id
-                }, {
-                    where: { id: order.id }
-                }, { transaction });
             });
 
             await transaction.commit();
